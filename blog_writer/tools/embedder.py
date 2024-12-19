@@ -17,7 +17,9 @@ class ReferenceEmbedder:
     These embeddings will be used as a reference for PostWriter when writing blog posts.
     """
 
-    @tool
+    def __init__(self):
+        self.retriever = None
+
     def set_reference_into_db(
         self, query: str, platform: Literal["naver"] = "naver"
     ) -> None:
