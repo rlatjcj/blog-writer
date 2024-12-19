@@ -1,2 +1,10 @@
+# Poetry
+poetry.lock
+dist/
+*.egg-info/
+
+# Virtual Environment
 .venv
 .env
+
+*.pyc
