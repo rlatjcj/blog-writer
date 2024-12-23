@@ -4,6 +4,10 @@
 
 ![graph](./images/graph.png)
 
+## Current interface
+
+![streamlit](./images/streamlit.png)
+
 ## TODO
 
 - [x] Create `OutlineGenerator` agent to generate outline.
