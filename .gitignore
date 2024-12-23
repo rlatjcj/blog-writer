@@ -6,5 +6,6 @@ dist/
 # Virtual Environment
 .venv
 .env
+.python-version
 
 *.pyc
