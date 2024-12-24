@@ -51,6 +51,7 @@ def create_outline_generator(state: State) -> str:
         {format_instructions}
         
         Please create a concise and structured outline that captures the key points and ideas from the reference contents.
+        Do not include indirectly related information about the topic ({topic}).
         Today is {date}
         """,
         input_variables=["reference_contents", "topic", "date"],
@@ -69,7 +70,7 @@ def create_outline_generator(state: State) -> str:
             "date": datetime.now().strftime("%Y-%m-%d"),
         }
     )
-    return {"outline": outline}
+    return {"outline": outline, "reference_contents": reference_contents}
 
 
 def scrape_reference_contents(
