@@ -50,5 +50,3 @@ if st.session_state.contents:
     for content in contents:
         st.write(content)
         st.write("---")
-else:
-    st.write("블로그 글이 생성되지 않았습니다.")
