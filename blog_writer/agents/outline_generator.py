@@ -14,7 +14,7 @@ from pydantic import Field, create_model
 from blog_writer.utils import State
 
 
-def create_outline_generator(state: State) -> str:
+def create_outline_generator(state: State) -> dict:
     """Generate an outline for a blog post based on the reference contents.
 
     Args:
@@ -23,7 +23,7 @@ def create_outline_generator(state: State) -> str:
         platform (Literal["naver"]): The platform to search for.
 
     Returns:
-        str: The generated outline.
+        dict: The generated outline and reference contents.
     """
 
     def create_outline_model(section_count: int):
@@ -111,7 +111,7 @@ def search_naver_blog_posts(
     topic: str,
     client_id: str = os.getenv("NAVER_CLIENT_ID"),
     client_secret: str = os.getenv("NAVER_CLIENT_SECRET"),
-) -> dict | str:
+) -> dict:
     """Use Naver Blog API to search for blog posts.
 
     Args:
@@ -133,7 +133,6 @@ def search_naver_blog_posts(
                     - bloggername: The name of the blog author.
                     - bloggerlink: The link to the blog author's profile.
                     - postdate: The date the blog post was published.
-        str: The error message if the request fails.
     """
     encText = urllib.parse.quote(topic)
     url = "https://openapi.naver.com/v1/search/blog?query=" + encText
