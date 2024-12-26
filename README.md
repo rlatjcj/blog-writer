@@ -19,4 +19,3 @@
     - [ ] Naver Blog
     - [ ] Tistory
     - [ ] Wordpress
- 

@@ -1,9 +1,13 @@
-from langgraph.graph import StateGraph, END
+"""Graph for blog writer."""
+
+from langgraph.graph import END, StateGraph
+
 from blog_writer.agents import create_outline_generator, create_writer
 from blog_writer.utils import State, save_graph
 
 
 def create_graph():
+    """Create a graph for blog writer."""
     graph = StateGraph(State)
 
     graph.add_node("outline_generator", create_outline_generator)

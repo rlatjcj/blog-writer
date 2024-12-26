@@ -1,4 +1,4 @@
-import os
+"""Streamlit app for blog writer."""
 
 import streamlit as st
 
@@ -32,7 +32,7 @@ if submit_button:
         platform=platform,
         total_sections=5,
         reference_contents=[],
-        reference_style="friendly and natural tone",  # TODO (sungchul): enable to input reference style
+        reference_style="friendly and natural tone",  # TODO (sungchul): input reference style
         language=language,
     )
 

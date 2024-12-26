@@ -1,4 +1,7 @@
+"""Utils for blog writer."""
+
 from typing import TYPE_CHECKING
+
 import cv2
 import numpy as np
 
@@ -7,12 +10,12 @@ if TYPE_CHECKING:
 
 
 def save_graph(graph: "Graph", filename: str = "images/blog_workflow.png") -> None:
-    """Visualize and save the graph
+    """Visualize and save the graph.
+
     Args:
         graph (Graph): The graph to visualize and save.
         filename (str): The filename to save the graph. Default is "images/blog_workflow.png"
     """
-
     try:
         graph_image = graph.get_graph().draw_mermaid_png()
         # Convert bytes to numpy array

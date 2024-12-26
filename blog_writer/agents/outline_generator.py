@@ -1,10 +1,11 @@
+"""Outline Generator Agent."""
+
 import ast
-from datetime import datetime
 import os
 import urllib.request
+from datetime import datetime
 from typing import Literal
 
-from langchain.tools import tool
 from langchain_core.documents import Document
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -18,9 +19,7 @@ def create_outline_generator(state: State) -> dict:
     """Generate an outline for a blog post based on the reference contents.
 
     Args:
-        query (str): The query to search for.
-        reference_contents (list[Document]): The reference contents to generate an outline.
-        platform (Literal["naver"]): The platform to search for.
+        state (State): The state of the agent.
 
     Returns:
         dict: The generated outline and reference contents.
@@ -42,22 +41,21 @@ def create_outline_generator(state: State) -> dict:
         You are a professional blog writer and your role is to generate an outline for a blog post.
         You should always answer in same language as user's ask.
         Based on the following reference contents and topic, generate an outline for a blog post:
-        
+
         Topic: {topic}
-        
+
         Reference Contents:
         {reference_contents}
-        
+
         {format_instructions}
-        
-        Please create a concise and structured outline that captures the key points and ideas from the reference contents.
+
+        Please create a concise and structured outline that captures the key points and
+        ideas from the reference contents.
         Do not include indirectly related information about the topic ({topic}).
         Today is {date}
         """,
         input_variables=["reference_contents", "topic", "date"],
-        partial_variables={
-            "format_instructions": outline_parser.get_format_instructions()
-        },
+        partial_variables={"format_instructions": outline_parser.get_format_instructions()},
     )
 
     reference_contents = scrape_reference_contents(state["topic"], state["platform"])
@@ -84,7 +82,8 @@ def scrape_reference_contents(
         platform (Literal["naver"]): The platform to search for.
 
     Returns:
-        list[Document]: The contents of the blog posts. If no blog posts are found, returns an empty list.
+        list[Document]: The contents of the blog posts.
+            If no blog posts are found, returns an empty list.
     """
     formatted_results: list[Document] = []
     if platform == "naver":
