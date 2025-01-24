@@ -23,6 +23,12 @@ def create_outline_generator(state: State) -> dict:
     Returns:
         dict: The generated outline and reference contents.
     """
+    # If custom sections are provided, return state as is
+    if state.get("custom_sections", False) and state["outline"]:
+        return {
+            "outline": state["outline"],
+            "reference_contents": state.get("reference_contents", []),
+        }
 
     def create_outline_model(section_count: int):
         fields = {
@@ -31,6 +37,7 @@ def create_outline_generator(state: State) -> dict:
         }
         return create_model("DynamicOutline", **fields)
 
+    # Generate outline using LLM
     llm = ChatOpenAI(model="gpt-4o-mini")
     dynamic_outline = create_outline_model(state["total_sections"])
     outline_parser = JsonOutputParser(pydantic_object=dynamic_outline)
