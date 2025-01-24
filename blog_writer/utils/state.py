@@ -13,6 +13,9 @@ class State(TypedDict):
     reference_contents: list[Document] = []
     reference_style: str = "friendly and natural tone"
     total_sections: int = 5
+    current_section: int = 0
     outline: dict
     contents: dict
     language: Literal["ko", "en"] = "ko"
+    naver_client_id: str
+    naver_client_secret: str

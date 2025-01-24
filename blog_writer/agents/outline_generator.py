@@ -1,7 +1,6 @@
 """Outline Generator Agent."""
 
 import ast
-import os
 import urllib.request
 from datetime import datetime
 from typing import Literal
@@ -58,7 +57,12 @@ def create_outline_generator(state: State) -> dict:
         partial_variables={"format_instructions": outline_parser.get_format_instructions()},
     )
 
-    reference_contents = scrape_reference_contents(state["topic"], state["platform"])
+    if state["platform"] == "naver":
+        secret_key = {
+            "client_id": state["naver_client_id"],
+            "client_secret": state["naver_client_secret"],
+        }
+    reference_contents = scrape_reference_contents(state["topic"], state["platform"], secret_key)
 
     chain = outline_prompt | llm | outline_parser
     outline = chain.invoke(
@@ -74,20 +78,25 @@ def create_outline_generator(state: State) -> dict:
 def scrape_reference_contents(
     topic: str,
     platform: Literal["naver"] = "naver",
+    secret_key: dict = {},
 ) -> list[Document]:
     """Scrape reference contents from the web.
 
     Args:
         topic (str): The topic to search for.
         platform (Literal["naver"]): The platform to search for.
-
+        secret_key (dict): The secret key for the platform.
     Returns:
         list[Document]: The contents of the blog posts.
             If no blog posts are found, returns an empty list.
     """
     formatted_results: list[Document] = []
     if platform == "naver":
-        results = search_naver_blog_posts(topic)
+        results = search_naver_blog_posts(
+            topic,
+            secret_key["client_id"],
+            secret_key["client_secret"],
+        )
         for result in results["items"]:
             formatted_results.append(
                 Document(
@@ -108,8 +117,8 @@ def scrape_reference_contents(
 
 def search_naver_blog_posts(
     topic: str,
-    client_id: str = os.getenv("NAVER_CLIENT_ID"),
-    client_secret: str = os.getenv("NAVER_CLIENT_SECRET"),
+    client_id: str,
+    client_secret: str,
 ) -> dict:
     """Use Naver Blog API to search for blog posts.
 
