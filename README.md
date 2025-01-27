@@ -6,16 +6,29 @@
 
 ## Current interface
 
-![streamlit](./images/streamlit.png)
+| Korean | English |
+| --- | --- |
+| ![streamlit](./images/streamlit_ko.png) | ![streamlit](./images/streamlit_en.png) |
 
-## TODO
+## How to run
 
-- [x] Create `OutlineGenerator` agent to generate outline.
-- [ ] Create `Supervisor` agent to supervise the whole process for writing blog post.
-- [x] Create `Writer` agent to write blog post.
-- [ ] Create `ImageAnalyzer` agent to analyze images.
-- [ ] Create `Poster` agent to post blog post to the platform.
-- [ ] Expand platform support for scraping blog posts and posting blog post.
-    - [ ] Naver Blog
-    - [ ] Tistory
-    - [ ] Wordpress
+### Install dependencies
+
+```bash
+# Install python packages (with pip)
+$ pip install -r requirements.txt
+
+# Install python packages with poetry
+$ pip install poetry
+$ poetry install
+```
+
+### Run with streamlit
+
+```bash
+# Run with streamlit
+$ streamlit run blog_writer/streamlit_app.py
+
+# Run with streamlit (with poetry)
+$ poetry run streamlit run blog_writer/streamlit_app.py --server.port 8501
+```

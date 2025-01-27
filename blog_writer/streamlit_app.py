@@ -27,10 +27,62 @@ def display_images(section_images: list[UploadedFile]) -> None:
             st.image(section_image)
 
 
+def get_ui_text(language: str) -> dict:
+    """Get UI text based on selected language.
+
+    Args:
+        language (str): Selected language code ('ko' or 'en')
+
+    Returns:
+        dict: UI text dictionary
+    """
+    if language == "en":
+        return {
+            "title": "✍️ Auto Blog Post Generator",
+            "topic": "Topic",
+            "topic_placeholder": "e.g., Camellia Hill in Jeju",
+            "title_input": "Title",
+            "title_placeholder": "e.g., My Visit to Camellia Hill in Jeju",
+            "sections_count": "Number of Sections",
+            "custom_sections_check": "Would you like to enter section titles manually?",
+            "sections_expander": "Please enter section titles:",
+            "section_placeholder": "e.g., Visitor Information, Recommended Course",
+            "section_help": "This field is required.",
+            "section_warning": "Please enter section title {}.",
+            "photo_upload": "Photo Upload",
+            "platform": "Platform",
+            "language": "Language",
+            "generate_button": "Generate Blog Post",
+            "generating_spinner": "Generating blog post...",
+        }
+    return {
+        "title": "✍️ 자동 블로그 글 생성기",
+        "topic": "주제",
+        "topic_placeholder": "예: 제주도 카멜리아힐",
+        "title_input": "제목",
+        "title_placeholder": "예: 제주도 카멜리아힐 방문후기",
+        "sections_count": "소제목 수",
+        "custom_sections_check": "소제목을 직접 입력하시겠습니까?",
+        "sections_expander": "소제목을 입력해주세요:",
+        "section_placeholder": "예: 방문 정보, 추천 코스 등",
+        "section_help": "이 필드는 필수입니다.",
+        "section_warning": "소제목 {}를 입력해주세요.",
+        "photo_upload": "사진 업로드",
+        "platform": "플랫폼",
+        "language": "언어",
+        "generate_button": "블로그 글 생성",
+        "generating_spinner": "블로그 글을 생성하고 있습니다...",
+    }
+
+
 if __name__ == "__main__":
     st.set_page_config(page_title="Blog Post Generator", layout="wide")
 
-    st.title("✍️ Auto Blog Post Generator")
+    # Language selector at the top
+    language = st.selectbox("Language / 언어", ["ko", "en"], index=0)
+    ui_text = get_ui_text(language)
+
+    st.title(ui_text["title"])
 
     # Initialize session state
     if "contents" not in st.session_state:
@@ -41,33 +93,35 @@ if __name__ == "__main__":
         st.session_state.section_titles = {}
 
     # Create form for input
-    topic = st.text_input("주제", placeholder="예: 제주도 카멜리아힐")
-    title = st.text_input("제목", placeholder="예: 제주도 카멜리아힐 방문후기")
-    total_sections = st.number_input("소제목 수", min_value=1, max_value=10, value=5, step=1)
+    topic = st.text_input(ui_text["topic"], placeholder=ui_text["topic_placeholder"])
+    title = st.text_input(ui_text["title_input"], placeholder=ui_text["title_placeholder"])
+    total_sections = st.number_input(
+        ui_text["sections_count"], min_value=1, max_value=10, value=5, step=1
+    )
 
-    # Add checkbox for custom section titles outside the form
-    custom_sections = st.checkbox("소제목을 직접 입력하시겠습니까?", key="custom_sections_checkbox")
+    # Add checkbox for custom section titles
+    custom_sections = st.checkbox(ui_text["custom_sections_check"], key="custom_sections_checkbox")
 
     # Create input fields for section titles if checkbox is checked
     if custom_sections:
         section_titles = {}
         section_images = {}
-        with st.expander("소제목을 입력해주세요:", expanded=True):
+        with st.expander(ui_text["sections_expander"], expanded=True):
             for i in range(1, total_sections + 1):
                 section_key = f"section{i}"
 
                 section_titles[section_key] = st.text_input(
-                    f"소제목 {i}",
+                    f"{ui_text['sections_count']} {i}",
                     key=section_key,
-                    placeholder="예: 방문 정보, 추천 코스 등",
-                    help="이 필드는 필수입니다.",
+                    placeholder=ui_text["section_placeholder"],
+                    help=ui_text["section_help"],
                 )
 
                 if not section_titles[section_key].strip():
-                    st.warning(f"소제목 {i}를 입력해주세요.")
+                    st.warning(ui_text["section_warning"].format(i))
 
                 section_images[section_key] = st.file_uploader(
-                    "사진 업로드",
+                    ui_text["photo_upload"],
                     accept_multiple_files=True,
                     type=["png", "jpg", "jpeg"],
                     key=f"image_{section_key}",
@@ -77,16 +131,8 @@ if __name__ == "__main__":
         st.session_state.section_titles = section_titles
         st.session_state.section_images = section_images
 
-    # else:
-    #     uploaded_images = st.file_uploader(
-    #         "블로그 작성에 참고할 사진, 그림을 추가해주세요.",
-    #         accept_multiple_files=True,
-    #         type=["png", "jpg", "jpeg"],
-    #     )
-
-    platform = st.selectbox("플랫폼", ["naver"])
-    language = st.selectbox("언어", ["ko", "en"])
-    submit_button = st.button("블로그 글 생성")
+    platform = st.selectbox(ui_text["platform"], ["naver"])
+    submit_button = st.button(ui_text["generate_button"])
 
     if submit_button:
         load_dotenv()
@@ -100,7 +146,7 @@ if __name__ == "__main__":
             platform=platform,
             total_sections=total_sections,
             reference_contents=[],
-            reference_style="friendly and natural tone",  # TODO (sungchul): input reference style
+            reference_style="friendly and natural tone",
             language=language,
             naver_client_id=os.getenv("NAVER_CLIENT_ID"),
             naver_client_secret=os.getenv("NAVER_CLIENT_SECRET"),
@@ -113,7 +159,7 @@ if __name__ == "__main__":
             custom_sections=custom_sections and all(st.session_state.section_titles.values()),
         )
 
-        with st.spinner("블로그 글을 생성하고 있습니다..."):
+        with st.spinner(ui_text["generating_spinner"]):
             final_state = graph.invoke(initial_state)
             st.session_state.contents = final_state["contents"]
 
@@ -128,5 +174,4 @@ if __name__ == "__main__":
             if 1 <= idx < len(contents) - 1:
                 if section_images := st.session_state.section_images.get(f"section{idx}", None):
                     display_images(section_images)
-
             st.write("---")
