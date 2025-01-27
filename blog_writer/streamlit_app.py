@@ -4,9 +4,28 @@ import os
 
 import streamlit as st
 from dotenv import load_dotenv
+from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from blog_writer.graph import create_graph
 from blog_writer.utils import State
+
+
+def display_images(section_images: list[UploadedFile]) -> None:
+    """Display images in a grid.
+
+    Args:
+        section_images: List of images to display.
+    """
+    if not section_images:
+        return
+
+    # Display images divided into columns based on the number of cols
+    columns = st.columns(len(section_images))
+
+    for idx, section_image in enumerate(section_images):
+        with columns[idx % len(section_images)]:
+            st.image(section_image)
+
 
 if __name__ == "__main__":
     st.set_page_config(page_title="Blog Post Generator", layout="wide")
@@ -30,15 +49,40 @@ if __name__ == "__main__":
     custom_sections = st.checkbox("소제목을 직접 입력하시겠습니까?", key="custom_sections_checkbox")
 
     # Create input fields for section titles if checkbox is checked
-    section_titles = {}
     if custom_sections:
+        section_titles = {}
+        section_images = {}
         with st.expander("소제목을 입력해주세요:", expanded=True):
             for i in range(1, total_sections + 1):
                 section_key = f"section{i}"
+
                 section_titles[section_key] = st.text_input(
-                    f"소제목 {i}", key=section_key, placeholder="예: 방문 정보, 추천 코스 등"
+                    f"소제목 {i}",
+                    key=section_key,
+                    placeholder="예: 방문 정보, 추천 코스 등",
+                    help="이 필드는 필수입니다.",
                 )
+
+                if not section_titles[section_key].strip():
+                    st.warning(f"소제목 {i}를 입력해주세요.")
+
+                section_images[section_key] = st.file_uploader(
+                    "사진 업로드",
+                    accept_multiple_files=True,
+                    type=["png", "jpg", "jpeg"],
+                    key=f"image_{section_key}",
+                    label_visibility="collapsed",
+                )
+
         st.session_state.section_titles = section_titles
+        st.session_state.section_images = section_images
+
+    # else:
+    #     uploaded_images = st.file_uploader(
+    #         "블로그 작성에 참고할 사진, 그림을 추가해주세요.",
+    #         accept_multiple_files=True,
+    #         type=["png", "jpg", "jpeg"],
+    #     )
 
     platform = st.selectbox("플랫폼", ["naver"])
     language = st.selectbox("언어", ["ko", "en"])
@@ -65,6 +109,7 @@ if __name__ == "__main__":
                 if custom_sections and all(st.session_state.section_titles.values())
                 else {}
             ),
+            section_images=st.session_state.get("section_images", {}),
             custom_sections=custom_sections and all(st.session_state.section_titles.values()),
         )
 
@@ -78,6 +123,10 @@ if __name__ == "__main__":
 
         st.header(initial_state["topic"])
         st.write("---")
-        for content in contents:
+        for idx, content in enumerate(contents):
             st.write(content)
+            if 1 <= idx < len(contents) - 1:
+                if section_images := st.session_state.section_images.get(f"section{idx}", None):
+                    display_images(section_images)
+
             st.write("---")

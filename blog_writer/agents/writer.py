@@ -1,9 +1,31 @@
 """Writer Agent."""
 
+import base64
+
 from langchain.prompts import PromptTemplate
+from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
+from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from blog_writer.utils import State
+
+
+def get_image_as_base64(file: UploadedFile) -> str | None:
+    """Encode image file to base64.
+
+    Args:
+        file (UploadedFile): The image file to encode.
+
+    Returns:
+        str | None: The base64 encoded image file.
+    """
+    if file is not None:
+        # Read file as bytes
+        bytes_data = file.getvalue()
+        # Encode to base64
+        base64_str = base64.b64encode(bytes_data).decode("utf-8")
+        return base64_str
+    return None
 
 
 def create_writer(state: State) -> dict:
@@ -50,6 +72,8 @@ def create_writer(state: State) -> dict:
         Refer to the previous sections and try not to repeat the same information:
         {previous_contents}
 
+        {image_context}
+
         Write the content with the following style:
         ## {section}
         content
@@ -64,15 +88,48 @@ def create_writer(state: State) -> dict:
         Do not include indirectly related information about the topic ({topic}).
         Write the content concisely in 5~10 lines.
         """,
-        input_variables=["topic", "section", "reference_contents", "previous_contents"],
+        input_variables=[
+            "topic",
+            "section",
+            "reference_contents",
+            "previous_contents",
+            "image_context",
+        ],
     )
-    for section in state["outline"].values():
+
+    for section_key, section in state["outline"].items():
+        # 해당 섹션의 이미지 정보 가져오기
+        section_images = state["section_images"].get(section_key, [])
+        section_images_context = ""
+        for section_image in section_images:
+            if image_base64 := get_image_as_base64(section_image):
+                image_context = llm.invoke(
+                    [
+                        HumanMessage(
+                            content=[
+                                {
+                                    "type": "text",
+                                    "text": "Please describe this image concisely in one sentence.",
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{image_base64}",
+                                    },
+                                },
+                            ]
+                        )
+                    ]
+                ).content
+                section_images_context += f"- {image_context}\n"
+
         section_content = llm.invoke(
             section_prompt.format(
                 topic=state["topic"],
                 section=section,
                 reference_contents=reference_contents,
                 previous_contents=previous_contents,
+                image_context=section_images_context,
                 reference_style=state["reference_style"],
                 language=state["language"],
             )

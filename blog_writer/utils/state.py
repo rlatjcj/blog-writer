@@ -15,8 +15,9 @@ class State(TypedDict):
     total_sections: int = 5
     current_section: int = 0
     outline: dict = {}
+    section_images: dict = {}
     contents: dict = {}
     language: Literal["ko", "en"] = "ko"
     naver_client_id: str
     naver_client_secret: str
-    custom_sections: bool = False  # 소제목 직접 입력 여부
+    custom_sections: bool = False
